@@ -13,8 +13,4 @@ My solution runs in *O(n)* time where *n* is the number of words in the dictiona
 
 **dict2** : 320,750 anagram classes in 7958 ms
 
-System Information
-
-CPU:	i7-2700k 4.40GHz
-
-Memory:	16GB 2133MHz
+(CPU: i7-2700k 4.40GHz; Memory: 16GB 2133MHz)
