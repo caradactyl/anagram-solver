@@ -3,194 +3,193 @@ package anagrams;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/********************************************************************************************
- * Dictionary is a hash table of Entry objects consisting of (String key, Anagram value) pairs.
- * When a Word is added to the Dictionary, the hash value of that word is computed. The hash 
- * value of a Word is a lexicographically sorted version of the String. If the hash table does
- * not contain the key, an Anagram class instance is created. If the hash table contains the 
- * key, the existing Anagram class associated to that key is retrieved. The Word is then added 
- * to the Anagram class, and the pair is put in the table.
+/**
+ * Hash table based implementation of the MapInterface interface. Hash collisions resolved by open
+ * addressing with linear probing.
  * 
  * @author Cara Magliozzi
- *
- ********************************************************************************************/
-public class Dictionary implements Iterable<String> {
-	
-	
-	/********************************************************************************************
-	 * Entry class representing (String key, Anagram value) pairs in the Dictionary.
-	 ********************************************************************************************/
-	private class Entry {
-		String key;
-		Anagram value;
-	}
-		
-	
-	private Entry[] htable;
-	private int count, capacity;
-	
-	
-	/********************************************************************************************
-	 * Construct Dictionary objects.
-	 ********************************************************************************************/
-	public Dictionary() {		
-		capacity = 35000;
-		htable = new Entry[capacity];
-		count = 0;
-	}
-	
-	
-	/********************************************************************************************
-	 * Add a Word to the Dictionary (and to an Anagram class). 
-	 ********************************************************************************************/
-	public void addWord(Word w) {
-		String key = w.sorted();
-		Anagram value;
+ * 
+ */
+public class Dictionary<K, V> implements MapInterface<K, V>, Iterable<K> {
 
-		if (this.containsKey(key))	value = this.get(key);
-		else						value = new Anagram(key);
-		
-		value.addWord(w);
-		this.put(key, value);
-	}
-	
+    /** Creates a new entry. */
+    private static class Entry<K, V> {
 
-	/********************************************************************************************
-	 * Convert a key into a hash value.
-	 ********************************************************************************************/
-	private int hashValue(String key) {
-	    int hashval = key.hashCode() % capacity;;
-	    
-	    // Java's modulus implementation may result in a negative number.
-	    
-	    return (hashval < 0) ? -hashval : hashval;
-	}
-	
-	
-	/********************************************************************************************
-	 * Expand the size of the hash table to double the capacity. 
-	 ********************************************************************************************/
-	private void expandTable() {
-		Entry[] oldTable = htable;
-		
-		capacity *= 2;
-		htable = new Entry[capacity];
-		
-		for (Entry e: oldTable) {
-			if (e == null) continue;
-			int idx = findSpot(e.key);
-			htable[idx] = e;
-		}
-	}
-	
-	
-	/********************************************************************************************
-	 * Find the key value, looping until an empty slot is found (indicating the key isn't there)
-	 * or until a a match is found (which means we're done).
-	 ********************************************************************************************/
-	private int find(String key) {
-		int hkey = hashValue(key);
-	
-		while (htable[hkey] != null && !htable[hkey].key.equals(key))
-			hkey = (hkey+1) % capacity;
-		
-		return (htable[hkey] != null) ? hkey : -1;
-	}
-	
-	
-	/********************************************************************************************
-	 * Find the first empty slot that can hold this key, looping until an empty slot is found.
-	 ********************************************************************************************/
-	private int findSpot(String key) {
-		int hkey = hashValue(key);
-	
-		while (htable[hkey] != null)
-			hkey = (hkey+1) % capacity;
-			
-		return hkey;
-	}
-	
-	
-	/********************************************************************************************
-	 * 
-	 ********************************************************************************************/
-	public Anagram get(String key) {
-		int idx = find(key);
-		
-		return (idx < 0) ? null : htable[idx].value;
-	}
+        private K key;
+        private V value;
 
-	
-	/********************************************************************************************
-	 * Put an Entry, a (String, Anagram) pair, in the hash table. 
-	 * Return the value previously associated to the key, if there was one, otherwise null.
-	 ********************************************************************************************/
-	private Anagram put(String key, Anagram value) {		
-		int idx = find(key);
-		Anagram oldValue;
-		Entry newEntry = new Entry();
-		newEntry.key = key;
-		newEntry.value = value;
-		
-		if (idx < 0) {
-			if (count > capacity/2)	expandTable();
-			oldValue = null;
-			idx = findSpot(key);
-		}
-		else oldValue = htable[idx].value;
+        Entry(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
 
-		htable[idx] = newEntry;
-		if (oldValue == null) count++;
-		
-		return oldValue;
-	}
-	
-	
-	/********************************************************************************************
-	 * Return true if the key is in the hash table, false otherwise.
-	 ********************************************************************************************/
-	private boolean containsKey(String key) { return find(key) >= 0; }
-	
-	
-	/********************************************************************************************
-	 * Return the number of Entries in the Dictionary.
-	 ********************************************************************************************/
-	public int size() { return count; }
-	
-	
-	/********************************************************************************************
-	 * Iterator over the keys in the hash table. 
-	 * The remove operation has not been implemented as it will not be needed at this time.
-	 ********************************************************************************************/
-	private class DIterator implements Iterator<String>{
+    }
+    /** Creates an iterator over the keys. */
+    private class KeyIterator implements Iterator<K> {
 
-		int next = 0;
-		int numSeen = 0;
-		int prev = -1;
+        int next = 0;
+        int seen = 0;
+        int previous = -1;
 
-		public boolean hasNext() { return numSeen < count; }
+        public boolean hasNext() {
+            return seen < size;
+        }
 
-		public String next() {
-			if (numSeen >= count) throw new NoSuchElementException( "already returned full list" );
-			
-			while (next < capacity) {
-				if (htable[next] != null) {
-					prev = next;
-					next++;
-					numSeen++;
-					return htable[prev].key;
-				}
-				next++;
-			}
-			throw new NoSuchElementException( "no remaining items found" );
-		}
+        public K next() {
+            if (seen >= size) {
+                throw new NoSuchElementException("already returned full list");
+            }
+            while (next < table.length) {
+                if (table[next] != null) {
+                    previous = next;
+                    next++;
+                    seen++;
+                    return table[previous].key;
+                }
+                next++;
+            }
+            throw new NoSuchElementException("no remaining items found");
+        }
 
-		public void remove() { throw new UnsupportedOperationException(); }
-	}
-	
-	
-	/********************************************************************************************
-	 * Return an instance of the Dictionary Iterator, DIterator.
-	 ********************************************************************************************/
-	public Iterator<String> iterator() { return new DIterator(); }
+        public void remove() {
+            throw new UnsupportedOperationException("remove is not supported at this time");
+        }
+    }
+
+    static final int DEFAULT_CAPACITY = 16;
+    static final float DEFAULT_LOAD_FACTOR = 0.75f;
+    static final int MAXIMUM_CAPACITY = 1 << 30;
+
+    private Entry<K, V>[] table;    // resized as necessary
+    private int size;               // number of key-value mappings
+    private int threshold;          // next size value to resize capacity
+    private final float loadFactor; // load factor for table
+
+    /** Constructs map with default capacity and load factor. */
+    public Dictionary() {
+        loadFactor = DEFAULT_LOAD_FACTOR;
+        threshold = (int) (DEFAULT_CAPACITY * DEFAULT_LOAD_FACTOR);
+        table = new Entry[DEFAULT_CAPACITY];
+    }
+
+    /** Constructs map with specified capacity and default load factor. */
+    public Dictionary(int capacity) {
+        this(capacity, DEFAULT_LOAD_FACTOR);
+    }
+
+    /** Constructs map with specified capacity and load factor. */
+    public Dictionary(int capacity, float loadFactor) {
+        if (capacity > MAXIMUM_CAPACITY) {
+            capacity = MAXIMUM_CAPACITY;
+        }
+        this.loadFactor = loadFactor;
+        threshold = (int) (capacity * loadFactor);
+        table = new Entry[capacity];
+    }
+
+    /** Returns true if this map contains a mapping for the specified key. */
+    public boolean containsKey(Object key) {
+        return indexFor(key) >= 0;
+    }
+
+    /** Returns value to which specified key is mapped, or null if map contains no mapping for key. */
+    public V get(Object key) {
+        int index = indexFor(key);
+        return (index < 0) ? null : table[index].value;
+    }
+
+    /** Returns true if map contains no key-value mappings. */
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    /** Returns a KeyIterator. */
+    public Iterator<K> iterator() {
+        return new KeyIterator();
+    }
+
+    /**
+     * Associates specified value with specified key in map. If map previously contained a mapping
+     * for the key, old value is replaced.
+     */
+    public V put(K key, V value) {
+        if (key == null) {
+            throw new IllegalArgumentException("null keys are not permitted");
+        }
+        int index = indexFor(key);
+        V oldValue;
+        Entry<K, V> newEntry = new Entry<K, V>(key, value);
+        if (index < 0) {
+            if (size >= threshold) {
+                resize(2 * table.length);
+            }
+            oldValue = null;
+            index = findEmptySlot(key);
+        } else {
+            oldValue = table[index].value;
+        }
+        table[index] = newEntry;
+        if (oldValue == null) {
+            size++;
+        }
+        return oldValue;
+    }
+
+    /** Returns number of key-value mappings in map. */
+    public int size() {
+        return size;
+    }
+
+    /** Finds first empty slot that can hold key and returns it. */
+    private int findEmptySlot(K key) {
+        int index = hash(key);
+        while (table[index] != null) {
+            index = (index + 1) % table.length;
+        }
+        return index;
+    }
+
+    /** Maps a key to a table index. Returns the index. */
+    private int hash(Object key) {
+        int index = key.hashCode() % table.length;
+        // Java's modulus implementation may result in negative number
+        return (index < 0) ? -index : index;
+    }
+
+    /** Finds index for key, looping until an empty slot or match is found. */
+    private int indexFor(Object key) {
+        int index = hash(key);
+        while (table[index] != null && !table[index].key.equals(key)) {
+            index = (index + 1) % table.length;
+        }
+        return (table[index] != null) ? index : -1;
+    }
+
+    /**
+     * Rehashes contents of map into new array with larger capacity. Called automatically when
+     * number of keys reaches threshold.
+     */
+    private void resize(int newCapacity) {
+        Entry<K, V>[] oldTable = table;
+        if (oldTable.length == MAXIMUM_CAPACITY) {
+            threshold = Integer.MAX_VALUE;
+            return;
+        }
+        table = new Entry[newCapacity];
+        threshold = (int) (newCapacity * loadFactor);
+        transferFrom(oldTable);
+
+    }
+
+    /** Transfers all the entries from oldTable to current table. */
+    private void transferFrom(Entry<K, V>[] oldTable) {
+        for (Entry<K, V> entry : oldTable) {
+            if (entry == null) {
+                continue;
+            }
+            int index = findEmptySlot(entry.key);
+            table[index] = entry;
+        }
+    }
+
 }
