@@ -15,9 +15,9 @@ Implemented a hash table, resulting in *O(n)* runtime where *n* is the number of
 5. If step 4 fails move up +1 to a new index until an anagram or a empty slot is found
 
 ## Solution
-**dict1** : 67,605 anagram classes in 80 ms
+**dict1** : 71,884 words mapped to 67,605 anagram classes in 80 ms
 
-**dict2** : 320,750 anagram classes in 7958 ms
+**dict2** : 6,757,474 words mapped to 320,750 anagram classes in 7958 ms
 
 (CPU: i7-2700k 4.40GHz; Memory: 16GB 2133MHz)
 
