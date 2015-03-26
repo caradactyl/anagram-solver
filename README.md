@@ -7,11 +7,11 @@ The goal is to find all anagrams in the dictionary. Write a program that reads i
 
 ## Algorithm Description
 Implemented a hash table, resulting in *O(n)* runtime where *n* is the number of words in the dictionary.
-1. Read in the word.
-2. Sort the word in alphabetical to produce the key.
-3. Hash the key into the table to find an empty slot to store it in.
-4. If collision occurs verify if current word is an anagram of the word in that array location.
-5. If step 4 fails move up +1 to a new index until an anagram or a empty slot is found
+1. 	Read in the word.
+2. 	Sort the word in alphabetical to produce the key.
+3. 	Hash the key into the table to find an empty slot to store it in.
+4. 	If collision occurs verify if current word is an anagram of the word in that array location.
+5. 	If step 4 fails move up +1 to a new index until an anagram or a empty slot is found
 
 ## Solution
 **dict1** : 67,605 anagram classes in 80 ms
