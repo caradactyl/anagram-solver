@@ -52,7 +52,7 @@ public class Dictionary<K, V> implements MapInterface<K, V>, Iterable<K> {
         }
 
         public void remove() {
-            throw new UnsupportedOperationException("remove is not supported at this time");
+            throw new UnsupportedOperationException("removal is not supported");
         }
     }
 
@@ -92,7 +92,7 @@ public class Dictionary<K, V> implements MapInterface<K, V>, Iterable<K> {
         return indexFor(key) >= 0;
     }
 
-    /** Returns value to which specified key is mapped, or null if map contains no mapping for key. */
+    /** Returns value to which specified key is mapped, or null if no mapping. */
     public V get(Object key) {
         int index = indexFor(key);
         return (index < 0) ? null : table[index].value;

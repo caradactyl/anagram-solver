@@ -17,8 +17,7 @@ public class Word {
 
     /** Returns sorted version of String corresponding to Word. */
     public String sorted() {
-        char[] wordChars = word.toCharArray();
-        Sorter.sort(wordChars);
+        char[] wordChars = Sorter.sort(word.toCharArray());        
         return new String(wordChars);
     }
 

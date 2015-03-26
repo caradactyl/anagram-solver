@@ -1,15 +1,45 @@
 package anagrams;
 
 /**
- * Sort char arrays. Used by Word class.
+ * Sorting functions for the Word class. Both counting sort and quicksort have
+ * been implemented, but currently only counting sort is in use.
+ * 
+ * counting sort : O(n)
+ * quicksort : O(n log n)
  * 
  * @author Cara Magliozzi
  * 
  */
 public class Sorter {
 
+    /** Calls private countingSort method. */
+    public static char[] sort(char[] chars) {
+        return countingSort(chars);
+    }
+
+    /** Returns a lexicographically sorted char array via counting sort. */
+    private static char[] countingSort(char[] chars) {
+        int[] histogram = new int[26];
+        for (int i = 0; i < chars.length; i++) {
+            histogram[chars[i] - 'a'] += 1;
+        }
+        int total = 0;
+        int oldCount;
+        for (int i = 0; i < 26; i++) {
+            oldCount = histogram[i];
+            histogram[i] = total;
+            total += oldCount;
+        }
+        char[] output = new char[chars.length];
+        for (int i = 0; i < chars.length; i++) {
+            output[histogram[chars[i] - 'a']] = chars[i];
+            histogram[chars[i] - 'a'] += 1;
+        }
+        return output;
+    }
+
     /** Calls private quicksort method. */
-    public static void sort(char[] chars) {
+    public static void quicksort(char[] chars) {
         quicksort(chars, 0, chars.length - 1);
     }
 
